@@ -2,7 +2,6 @@ package regru
 
 import (
 	"context"
-	"fmt"
 )
 
 // BillService handles invoice-related API calls.
@@ -36,9 +35,9 @@ type GetForPeriodRequest struct {
 	StartDate string `json:"start_date"` // ISO format: YYYY-MM-DD
 	EndDate   string `json:"end_date"`   // ISO format: YYYY-MM-DD
 	PayType   string `json:"pay_type,omitempty"`
-	Limit     int    `json:"limit,omitempty"`  // default 100, max 1024
+	Limit     int    `json:"limit,omitempty"` // default 100, max 1024
 	Offset    int    `json:"offset,omitempty"`
-	All       int    `json:"all,omitempty"`    // include inactive bills
+	All       int    `json:"all,omitempty"` // include inactive bills
 }
 
 // GetForPeriod returns invoices for a specified period.
@@ -73,15 +72,15 @@ func (s *BillService) GetForPeriod(ctx context.Context, req GetForPeriodRequest)
 type ChangePayTypeRequest struct {
 	BillID   string   `json:"bill_id,omitempty"`
 	Bills    []string `json:"bills,omitempty"`
-	PayType  string   `json:"pay_type"`  // prepay, yamoney, bank
-	Currency string   `json:"currency"`  // RUR, USD
+	PayType  string   `json:"pay_type"` // prepay, yamoney, bank
+	Currency string   `json:"currency"` // RUR, USD
 }
 
 // ChangePayType changes the payment method for an invoice.
 func (s *BillService) ChangePayType(ctx context.Context, req ChangePayTypeRequest) error {
 	params := map[string]interface{}{
-		"pay_type":  req.PayType,
-		"currency":  req.Currency,
+		"pay_type": req.PayType,
+		"currency": req.Currency,
 	}
 	if req.BillID != "" {
 		params["bill_id"] = req.BillID

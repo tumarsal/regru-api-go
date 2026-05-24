@@ -2,8 +2,6 @@ package regru
 
 import (
 	"context"
-	"fmt"
-	"net/url"
 )
 
 // UserService handles user-related API calls.
@@ -23,11 +21,11 @@ func (s *UserService) Nop(ctx context.Context) error {
 
 // CreateUserRequest is a request to create a new user.
 type CreateUserRequest struct {
-	UserLogin         string   `json:"user_login"`
-	UserPassword      string   `json:"user_password"`
-	UserEmail         string   `json:"user_email"`
-	UserIP            string   `json:"user_ip"`
-	DefaultCountryCode string  `json:"default_country_code,omitempty"`
+	UserLogin          string `json:"user_login"`
+	UserPassword       string `json:"user_password"`
+	UserEmail          string `json:"user_email"`
+	UserIP             string `json:"user_ip"`
+	DefaultCountryCode string `json:"default_country_code,omitempty"`
 
 	// Simplified registration - only email
 	EmailOnly bool `json:"email_only,omitempty"`
@@ -45,11 +43,11 @@ type CreateUserRequest struct {
 	UserLanguage  string `json:"user_language,omitempty"` // ru or en
 
 	// Other options
-	UserSubscribe    int      `json:"user_subsribe,omitempty"` // note: typo matches API
-	UserMailNotify   int      `json:"user_mailnotify,omitempty"`
-	SetMeAsReferrer  int      `json:"set_me_as_referrer,omitempty"`
-	CheckOnly        int      `json:"check_only,omitempty"`
-	WhiteListIPs     []string `json:"white_list_ips,omitempty"`
+	UserSubscribe   int      `json:"user_subsribe,omitempty"` // note: typo matches API
+	UserMailNotify  int      `json:"user_mailnotify,omitempty"`
+	SetMeAsReferrer int      `json:"set_me_as_referrer,omitempty"`
+	CheckOnly       int      `json:"check_only,omitempty"`
+	WhiteListIPs    []string `json:"white_list_ips,omitempty"`
 }
 
 // CreateUser registers a new user (reseller only).

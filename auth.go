@@ -6,7 +6,6 @@ import (
 	"crypto/sha512"
 	"crypto/x509"
 	"encoding/base64"
-	"encoding/json"
 	"encoding/pem"
 	"fmt"
 	"os"
@@ -134,7 +133,7 @@ func makeTextForSigRecursive(v interface{}) []string {
 
 // ClientWithSignature creates a new API client using signature authentication.
 func ClientWithSignature(username string, privateKey []byte, opts ...ClientOption) (*Client, error) {
-	sigAuth, err := NewSignatureAuth(username, privateKey)
+	_, err := NewSignatureAuth(username, privateKey)
 	if err != nil {
 		return nil, err
 	}

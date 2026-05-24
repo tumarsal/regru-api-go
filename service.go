@@ -2,7 +2,6 @@ package regru
 
 import (
 	"context"
-	"fmt"
 )
 
 // ServiceService handles service-related API calls.
@@ -51,22 +50,22 @@ func (s *ServiceService) GetServTypeDetails(ctx context.Context, serviceType str
 
 // CreateServiceRequest is a request to order a new service.
 type CreateServiceRequest struct {
-	DomainName   string                 `json:"dname"`
-	ServiceType  string                 `json:"servtype"`
-	SubType      string                 `json:"subtype,omitempty"`
-	Period       int                    `json:"period,omitempty"`
-	PayType      string                 `json:"pay_type,omitempty"`
-	OkIfNoMoney  int                    `json:"ok_if_no_money,omitempty"`
-	ServiceID    string                 `json:"service_id,omitempty"`
+	DomainName  string `json:"dname"`
+	ServiceType string `json:"servtype"`
+	SubType     string `json:"subtype,omitempty"`
+	Period      int    `json:"period,omitempty"`
+	PayType     string `json:"pay_type,omitempty"`
+	OkIfNoMoney int    `json:"ok_if_no_money,omitempty"`
+	ServiceID   string `json:"service_id,omitempty"`
 	// Service-specific parameters
-	ExtraParams  map[string]interface{} `json:"-"`
+	ExtraParams map[string]interface{} `json:"-"`
 }
 
 // Create orders a new service.
 func (s *ServiceService) Create(ctx context.Context, req CreateServiceRequest) (*ServiceCreateResponse, error) {
 	params := map[string]interface{}{
-		"dname":     req.DomainName,
-		"servtype":  req.ServiceType,
+		"dname":    req.DomainName,
+		"servtype": req.ServiceType,
 	}
 	if req.SubType != "" {
 		params["subtype"] = req.SubType
@@ -106,8 +105,8 @@ type ServiceCreateResponse struct {
 // CheckCreate validates service order parameters without actually ordering.
 func (s *ServiceService) CheckCreate(ctx context.Context, req CreateServiceRequest) error {
 	params := map[string]interface{}{
-		"dname":     req.DomainName,
-		"servtype":  req.ServiceType,
+		"dname":    req.DomainName,
+		"servtype": req.ServiceType,
 	}
 	if req.SubType != "" {
 		params["subtype"] = req.SubType
@@ -129,11 +128,11 @@ func (s *ServiceService) Delete(ctx context.Context, service ServiceID) error {
 
 // GetInfoRequest is a request to get service information.
 type GetInfoRequest struct {
-	Services       []ServiceID `json:"services,omitempty"`
-	Domains        []ServiceID `json:"domains,omitempty"`
-	ShowHidden     int         `json:"show_hidden,omitempty"`
-	ShowContactsOnly int       `json:"show_contacts_only,omitempty"`
-	SeparateGroups int         `json:"separate_groups,omitempty"`
+	Services         []ServiceID `json:"services,omitempty"`
+	Domains          []ServiceID `json:"domains,omitempty"`
+	ShowHidden       int         `json:"show_hidden,omitempty"`
+	ShowContactsOnly int         `json:"show_contacts_only,omitempty"`
+	SeparateGroups   int         `json:"separate_groups,omitempty"`
 }
 
 // GetInfo returns information about services.

@@ -2,7 +2,6 @@ package regru
 
 import (
 	"context"
-	"fmt"
 )
 
 // ZoneService handles DNS zone-related API calls.
@@ -56,11 +55,11 @@ func (s *ZoneService) AddRecord(ctx context.Context, domainName string, record D
 		return nil, err
 	}
 	return &ZoneRecord{
-		RecordID:  answer.RecordID,
-		SubDomain: record.SubDomain,
-		Content:   record.Content,
+		RecordID:   answer.RecordID,
+		SubDomain:  record.SubDomain,
+		Content:    record.Content,
 		RecordType: record.RecordType,
-		Priority:  record.Priority,
+		Priority:   record.Priority,
 	}, nil
 }
 

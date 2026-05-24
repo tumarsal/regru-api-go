@@ -1,7 +1,6 @@
 package regru
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"encoding/xml"

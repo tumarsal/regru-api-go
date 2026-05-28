@@ -19,7 +19,39 @@ go install ./cmd/regru/
 cp .env.example .env  # username, password
 ```
 
-Конфигурация: файл `.env`, переменные `REGRU_*` или флаги `--username`, `--password`. Базовый URL API по умолчанию: `https://api.reg.ru`.
+Конфигурация: файл `.env`, переменные `REGRU_*` или флаги. Базовый URL API по умолчанию: `https://api.reg.ru`.
+
+Способы авторизации (`--auth`):
+
+| Режим | Параметры | Описание |
+|-------|-----------|----------|
+| `password` | `username` + `password` | Логин и пароль (или API-пароль из настроек REG.RU) |
+| `signature` | `username` + `private_key` | RSA-подпись SHA-512 каждого запроса |
+| + TLS | `cert_file` + `key_file` | Клиентский SSL-сертификат (обязателен при подписи, опционален с паролем) |
+
+```bash
+# пароль (по умолчанию)
+regru --auth password balance
+
+# RSA-подпись
+regru --auth signature --private-key ~/.reg.ru/api.key nop
+
+# пароль + клиентский TLS-сертификат
+regru --auth password --cert-file ~/.reg.ru/api.crt --key-file ~/.reg.ru/api.key zone list example.ru
+
+# подпись + TLS (типичная конфигурация для production API)
+regru --auth signature --private-key ~/.reg.ru/api.key --cert-file ~/.reg.ru/api.crt balance
+```
+
+В `.env`:
+
+```env
+REGRU_AUTH=signature
+REGRU_USERNAME=login
+REGRU_PRIVATE_KEY=/path/to/private.key
+REGRU_CERT_FILE=/path/to/client.crt
+REGRU_KEY_FILE=/path/to/private.key
+```
 
 ## Быстрый старт
 
@@ -64,9 +96,9 @@ func main() {
 client := regru.NewClient("username", "password")
 ```
 
-### По сигнатуре (безопасный способ)
+### По RSA-подписи (signature)
 
-Требует SSL-сертификат, загруженный в настройках API REG.RU:
+Требует загрузки SSL-сертификата в [настройках API REG.RU](https://www.reg.ru/user/account/#/settings/api/). Каждый запрос подписывается приватным ключом (`sig` в теле запроса):
 
 ```go
 privateKey, err := os.ReadFile("/path/to/private.key")
@@ -78,6 +110,21 @@ client, err := regru.ClientWithSignature("username", privateKey)
 if err != nil {
     log.Fatal(err)
 }
+```
+
+### С клиентским TLS-сертификатом (mTLS)
+
+Если в настройках API загружен сертификат, его нужно передавать в TLS-соединении (в дополнение к паролю или подписи):
+
+```go
+tlsOpt, err := regru.NewTLSClientAuthOption("/path/to/client.crt", "/path/to/private.key")
+if err != nil {
+    log.Fatal(err)
+}
+
+client := regru.NewClient("username", "password", tlsOpt)
+// или вместе с подписью:
+client, err := regru.ClientWithSignature("username", privateKeyPEM, tlsOpt)
 ```
 
 ## Документация API

@@ -27,7 +27,7 @@ var nopCmd = &cobra.Command{
 		if err := client.Nop(ctx); err != nil {
 			return fmt.Errorf("authenticated nop: %w", err)
 		}
-		fmt.Println("API доступен (ваши учётные данные)")
+		fmt.Printf("API доступен (auth: %s)\n", authModeLabel())
 		return nil
 	},
 }

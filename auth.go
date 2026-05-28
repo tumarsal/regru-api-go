@@ -132,15 +132,13 @@ func makeTextForSigRecursive(v interface{}) []string {
 }
 
 // ClientWithSignature creates a new API client using signature authentication.
+// Each request is signed with the RSA private key (zone/add_* and other methods).
 func ClientWithSignature(username string, privateKey []byte, opts ...ClientOption) (*Client, error) {
-	_, err := NewSignatureAuth(username, privateKey)
+	sa, err := NewSignatureAuth(username, privateKey)
 	if err != nil {
 		return nil, err
 	}
-
-	// Create a custom transport that signs each request
-	c := NewClient(username, "", append(opts, WithSignatureAuth(""))...)
-
-	// Wrap the client's request method to inject signatures
+	c := NewClient(username, "", opts...)
+	c.sigAuth = sa
 	return c, nil
 }

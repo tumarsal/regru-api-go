@@ -2,6 +2,7 @@ package regru
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
@@ -18,6 +19,7 @@ type Client struct {
 	HTTPClient *http.Client
 	auth       AuthParams
 	input      InputParams
+	sigAuth    *SignatureAuth
 }
 
 // ClientOption configures the Client.
@@ -74,22 +76,32 @@ func WithOutputFormat(format string) ClientOption {
 	}
 }
 
+// NewTLSClientAuthOption configures mutual TLS (client certificate) for API requests.
+// Required when an SSL certificate is uploaded in REG.RU API settings.
+func NewTLSClientAuthOption(certFile, keyFile string) (ClientOption, error) {
+	cert, err := tls.LoadX509KeyPair(certFile, keyFile)
+	if err != nil {
+		return nil, fmt.Errorf("load TLS client cert: %w", err)
+	}
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{
+			Certificates: []tls.Certificate{cert},
+			MinVersion:   tls.VersionTLS12,
+		},
+	}
+	return func(c *Client) {
+		if c.HTTPClient == nil {
+			c.HTTPClient = &http.Client{Timeout: 30 * time.Second}
+		}
+		c.HTTPClient.Transport = transport
+	}, nil
+}
+
 // request builds and executes an API call.
 func (c *Client) request(ctx context.Context, category, function string, params map[string]interface{}) (*Response, error) {
 	apiURL := fmt.Sprintf("%s%s/%s/%s", c.BaseURL, DefaultBaseURLPath, category, function)
 
 	formData := url.Values{}
-
-	// Add auth params
-	if c.auth.Username != "" {
-		formData.Set("username", c.auth.Username)
-	}
-	if c.auth.Password != "" {
-		formData.Set("password", c.auth.Password)
-	}
-	if c.auth.Sig != "" {
-		formData.Set("sig", c.auth.Sig)
-	}
 
 	// Add output format
 	if c.input.OutputContentType != "" {
@@ -133,6 +145,22 @@ func (c *Client) request(ctx context.Context, category, function string, params 
 				formData.Set(k, fmt.Sprintf("%v", v))
 			}
 		}
+	}
+
+	// Auth: password or per-request RSA signature
+	if c.auth.Username != "" {
+		formData.Set("username", c.auth.Username)
+	}
+	if c.sigAuth != nil {
+		sig, err := c.sigAuth.Sign(buildSignParams(c.auth.Username, c.input.OutputContentType, hasComplex, params))
+		if err != nil {
+			return nil, fmt.Errorf("sign request: %w", err)
+		}
+		formData.Set("sig", sig)
+	} else if c.auth.Sig != "" {
+		formData.Set("sig", c.auth.Sig)
+	} else if c.auth.Password != "" {
+		formData.Set("password", c.auth.Password)
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, apiURL, strings.NewReader(formData.Encode()))
@@ -250,4 +278,20 @@ func toJSON(v interface{}) string {
 // fromXML helper.
 func fromXML(data []byte, v interface{}) error {
 	return xml.Unmarshal(data, v)
+}
+
+func buildSignParams(username, outputFormat string, hasComplex bool, params map[string]interface{}) map[string]interface{} {
+	m := map[string]interface{}{
+		"username": username,
+	}
+	if outputFormat != "" {
+		m["output_content_type"] = outputFormat
+	}
+	if hasComplex {
+		m["input_format"] = InputJSON
+	}
+	for k, v := range params {
+		m[k] = v
+	}
+	return m
 }

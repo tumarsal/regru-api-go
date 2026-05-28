@@ -227,22 +227,47 @@ type NameServer struct {
 	IP      string `json:"ip,omitempty"`
 }
 
-// DNSRecord represents a DNS resource record.
-type DNSRecord struct {
-	SubDomain   string `json:"subdomain,omitempty"`
-	Content     string `json:"content"`
-	RecordType  string `json:"rectype,omitempty"`
-	Priority    string `json:"priority,omitempty"`
-	TTL         int    `json:"ttl,omitempty"`
+// ResourceRecord is a DNS resource record from zone/get_resource_records.
+type ResourceRecord struct {
+	Subname  string `json:"subname"`
+	Rectype  string `json:"rectype"`
+	Content  string `json:"content"`
+	Priority string `json:"prio,omitempty"`
+	State    string `json:"state,omitempty"`
 }
 
-// ZoneRecord represents a DNS zone record.
+// RecordFilter filters resource records (client-side).
+type RecordFilter struct {
+	Type      string // A, AAAA, CNAME, MX, NS, TXT, SRV, CAA, HTTPS, ...
+	Subdomain string // matches subname (@, *, www, ...)
+	Content   string // exact match on content
+}
+
+// DNSRecord describes parameters for adding a DNS record via zone/add_*.
+type DNSRecord struct {
+	SubDomain     string `json:"subdomain,omitempty"`
+	Content       string `json:"content,omitempty"`
+	RecordType    string `json:"rectype,omitempty"`
+	Priority      string `json:"priority,omitempty"`
+	CanonicalName string `json:"canonical_name,omitempty"`
+	DNSServer     string `json:"dns_server,omitempty"`
+	RecordNumber  string `json:"record_number,omitempty"`
+	Service       string `json:"service,omitempty"`
+	Weight        string `json:"weight,omitempty"`
+	Port          string `json:"port,omitempty"`
+	Text          string `json:"text,omitempty"`
+	Flags         int    `json:"flags,omitempty"`
+	Tag           string `json:"tag,omitempty"`
+	Target        string `json:"target,omitempty"`
+	Value         string `json:"value,omitempty"`
+}
+
+// ZoneRecord is a legacy alias for ResourceRecord fields.
 type ZoneRecord struct {
-	RecordID    int    `json:"record_id"`
-	SubDomain   string `json:"subdomain"`
-	Content     string `json:"content"`
-	RecordType  string `json:"rectype"`
-	Priority    string `json:"priority,omitempty"`
+	SubDomain  string `json:"subdomain"`
+	Content    string `json:"content"`
+	RecordType string `json:"rectype"`
+	Priority   string `json:"priority,omitempty"`
 }
 
 // DomainPrice represents pricing information for a domain zone.

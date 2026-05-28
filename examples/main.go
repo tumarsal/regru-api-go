@@ -109,20 +109,16 @@ func main() {
 	fmt.Println("\n=== DNS zone management ===")
 	zoneService := client.Zone()
 
-	// Add A record
-	record, err := zoneService.Add_Alias(ctx, "example.ru", "www", "1.2.3.4")
-	if err != nil {
+	if err := zoneService.Add_Alias(ctx, "example.ru", "www", "1.2.3.4"); err != nil {
 		log.Printf("Add A record error: %v", err)
 	} else {
-		fmt.Printf("Added A record with ID: %d\n", record.RecordID)
+		fmt.Println("Added A record")
 	}
 
-	// Add MX record
-	mxRecord, err := zoneService.Add_MX(ctx, "example.ru", "", "mail.example.ru", "10")
-	if err != nil {
+	if err := zoneService.Add_MX(ctx, "example.ru", "@", "mail.example.ru", "10"); err != nil {
 		log.Printf("Add MX record error: %v", err)
 	} else {
-		fmt.Printf("Added MX record with ID: %d\n", mxRecord.RecordID)
+		fmt.Println("Added MX record")
 	}
 
 	// === Example 9: Folder management ===

@@ -8,6 +8,19 @@ Go-клиент для работы с API REG.RU (Рег.API 2.0) — доме�
 go get github.com/example/regru-api-go
 ```
 
+### CLI (`regru`)
+
+```bash
+# из исходников репозитория
+make install          # → $(go env GOPATH)/bin/regru
+# или
+go install ./cmd/regru/
+
+cp .env.example .env  # username, password
+```
+
+Конфигурация: файл `.env`, переменные `REGRU_*` или флаги `--username`, `--password`. Базовый URL API по умолчанию: `https://api.reg.ru`.
+
 ## Быстрый старт
 
 ```go
@@ -138,18 +151,46 @@ if err != nil {
 - `domain/look_at_entering_list` — входящие передачи
 
 ### DNS-зона (`Zone`)
-- `zone/nop` — проверка доступности
-- `zone/get_records` — получение записей
-- `zone/add_record` — добавление записи
-- `zone/update_record` — обновление записи
-- `zone/delete_record` — удаление записи
-- `zone/delete_records` — массовое удаление
-- `zone/clear` — очистка зоны
-- `zone/tmpl_create` / `tmpl_get` / `tmpl_delete` — шаблоны DNS
-- `zone/tmpl_apply` — применение шаблона
 
-Хелперы:
-- `Add_A` / `Add_AAAA` / `Add_CNAME` / `Add_MX` / `Add_NS` / `Add_TXT` / `Add_SRV`
+Документация REG.API: [zone/add_aaaa](https://www.reg.ru/reseller/api2doc), [zone/get_resource_records](https://www.reg.ru/reseller/api2doc).
+
+- `zone/nop` — проверка доступности
+- `zone/get_resource_records` — список записей (`GetResourceRecords`, `FilterRecords`)
+- `zone/add_alias` / `zone/add_aaaa` / `zone/add_cname` / `zone/add_mx` / `zone/add_ns` / `zone/add_txt` / `zone/add_srv` / `zone/add_caa` / `zone/add_https` — добавление (`AddRecord`)
+- `zone/remove_record` — удаление (`RemoveRecord`)
+- `zone/clear` — очистка зоны
+
+Хелперы: `Add_Alias`, `Add_AAAA`, `Add_CNAME`, `Add_MX`, `Add_NS`, `Add_TXT`, `Add_SRV`.
+
+#### CLI: просмотр и добавление записей
+
+```bash
+# все записи зоны
+regru zone list example.ru
+
+# с фильтрами
+regru zone list example.ru --type AAAA
+regru zone list example.ru --subdomain www
+regru zone list example.ru --type A --content 1.2.3.4
+
+# добавление (тип → соответствующий zone/add_* на стороне API)
+regru zone add example.ru --type A --subdomain www --content 1.2.3.4
+regru zone add example.ru --type AAAA --subdomain @ --content 2001:db8::1
+regru zone add example.ru --type CNAME --subdomain mail --canonical-name mx10.example.ru
+regru zone add example.ru --type MX --subdomain @ --content mail.example.ru --priority 10
+regru zone add example.ru --type NS --subdomain tt --dns-server ns1.example.ru --record-number 10
+regru zone add example.ru --type TXT --subdomain @ --text "v=spf1 ~all"
+regru zone add example.ru --type SRV --service _sip._udp --target sip.example.ru --port 5060 --priority 0
+regru zone add example.ru --type CAA --subdomain @ --tag issuewild --value ca.example.com --flags 0
+regru zone add example.ru --type HTTPS --subdomain @ --target . --value "alpn=h3" --priority 1
+```
+
+```go
+records, err := client.Zone().GetResourceRecords(ctx, "example.ru")
+filtered := regru.FilterRecords(records, regru.RecordFilter{Type: "AAAA", Subdomain: "www"})
+
+err = client.Zone().Add_AAAA(ctx, "example.ru", "www", "2001:db8::1")
+```
 
 ### Папки (`Folder`)
 - `folder/nop` — проверка доступности

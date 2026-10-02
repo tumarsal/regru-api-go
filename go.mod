@@ -1,4 +1,4 @@
-module github.com/example/regru-api-go
+module github.com/tumarsal/regru-api-go
 
 go 1.23.0
 

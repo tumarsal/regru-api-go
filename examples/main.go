@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	regru "github.com/example/regru-api-go"
+	regru "github.com/tumarsal/regru-api-go"
 )
 
 func main() {

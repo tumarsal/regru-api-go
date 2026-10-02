@@ -5,7 +5,7 @@ Go-клиент для работы с API REG.RU (Рег.API 2.0) — доме�
 ## Установка
 
 ```bash
-go get github.com/example/regru-api-go
+go get github.com/tumarsal/regru-api-go
 ```
 
 ### CLI (`regru`)
@@ -63,7 +63,7 @@ import (
     "fmt"
     "log"
 
-    regru "github.com/example/regru-api-go"
+    regru "github.com/tumarsal/regru-api-go"
 )
 
 func main() {

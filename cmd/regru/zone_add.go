@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	regru "github.com/example/regru-api-go"
+	regru "github.com/tumarsal/regru-api-go"
 	"github.com/spf13/cobra"
 )
 

@@ -15,7 +15,7 @@ func RecordSyncKey(recordType, subdomain, content, priority string) string {
 
 // ResourceRecordKey — ключ существующей записи из API.
 func ResourceRecordKey(r ResourceRecord) string {
-	return RecordSyncKey(r.Rectype, r.Subname, r.Content, r.Priority)
+	return RecordSyncKey(r.Rectype, r.Subname, r.Content, r.Priority.String())
 }
 
 // DesiredRecordKey — ключ желаемой записи для добавления.

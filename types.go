@@ -1,7 +1,12 @@
 // Package regru provides a Go client for REG.RU API 2.0.
 package regru
 
-import "encoding/json"
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"strconv"
+)
 
 const (
 	// DefaultBaseURL is the production API endpoint.
@@ -227,13 +232,55 @@ type NameServer struct {
 	IP      string `json:"ip,omitempty"`
 }
 
+// StringOrNumber принимает JSON-строку или число и хранит как string.
+// REG.API иногда отдаёт prio как number (10), иногда как "10".
+type StringOrNumber string
+
+func (s StringOrNumber) String() string { return string(s) }
+
+func (s *StringOrNumber) UnmarshalJSON(b []byte) error {
+	b = bytes.TrimSpace(b)
+	if bytes.Equal(b, []byte("null")) {
+		*s = ""
+		return nil
+	}
+	if len(b) > 0 && b[0] == '"' {
+		var str string
+		if err := json.Unmarshal(b, &str); err != nil {
+			return err
+		}
+		*s = StringOrNumber(str)
+		return nil
+	}
+	var num json.Number
+	dec := json.NewDecoder(bytes.NewReader(b))
+	dec.UseNumber()
+	if err := dec.Decode(&num); err != nil {
+		return fmt.Errorf("StringOrNumber: %w", err)
+	}
+	if i, err := num.Int64(); err == nil {
+		*s = StringOrNumber(strconv.FormatInt(i, 10))
+		return nil
+	}
+	if f, err := num.Float64(); err == nil {
+		*s = StringOrNumber(strconv.FormatFloat(f, 'f', -1, 64))
+		return nil
+	}
+	*s = StringOrNumber(num.String())
+	return nil
+}
+
+func (s StringOrNumber) MarshalJSON() ([]byte, error) {
+	return json.Marshal(string(s))
+}
+
 // ResourceRecord is a DNS resource record from zone/get_resource_records.
 type ResourceRecord struct {
-	Subname  string `json:"subname"`
-	Rectype  string `json:"rectype"`
-	Content  string `json:"content"`
-	Priority string `json:"prio,omitempty"`
-	State    string `json:"state,omitempty"`
+	Subname  string         `json:"subname"`
+	Rectype  string         `json:"rectype"`
+	Content  string         `json:"content"`
+	Priority StringOrNumber `json:"prio,omitempty"`
+	State    string         `json:"state,omitempty"`
 }
 
 // RecordFilter filters resource records (client-side).

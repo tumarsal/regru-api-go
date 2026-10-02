@@ -125,8 +125,8 @@ func runZoneSync(cmd *cobra.Command, args []string) error {
 
 	for _, r := range plan.ToRemove {
 		line := fmt.Sprintf("- %s %s %s", r.Rectype, r.Subname, r.Content)
-		if r.Priority != "" {
-			line += " (prio " + r.Priority + ")"
+		if p := r.Priority.String(); p != "" {
+			line += " (prio " + p + ")"
 		}
 		fmt.Println(line)
 	}
@@ -146,7 +146,7 @@ func runZoneSync(cmd *cobra.Command, args []string) error {
 	}
 
 	for _, r := range plan.ToRemove {
-		if err := client.Zone().RemoveRecord(ctx, domain, r.Subname, r.Rectype, r.Content, r.Priority); err != nil {
+		if err := client.Zone().RemoveRecord(ctx, domain, r.Subname, r.Rectype, r.Content, r.Priority.String()); err != nil {
 			return fmt.Errorf("удаление %s %s: %w", r.Rectype, r.Subname, err)
 		}
 	}
@@ -196,8 +196,8 @@ func yamlRecordsFromAPI(records []regru.ResourceRecord) []zoneYAMLRecord {
 			Subdomain: r.Subname,
 			Content:   r.Content,
 		}
-		if r.Priority != "" {
-			row.Priority = r.Priority
+		if p := r.Priority.String(); p != "" {
+			row.Priority = p
 		}
 		out = append(out, row)
 	}
